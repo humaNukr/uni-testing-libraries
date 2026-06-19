@@ -111,7 +111,7 @@ class FraudDetectionServiceTest {
             Transaction tx = new Transaction("tx-alert", "user-alert", new BigDecimal("500.0"), "UA");
             when(userRepository.findById("user-alert")).thenReturn(new User("user-alert", false));
 
-            when(riskEngine.calculateRisk(tx)).thenReturn(new BigDecimal("80.0"));
+            when(riskEngine.calculateRisk(tx)).thenReturn(new BigDecimal("90.0"));
 
             service.analyze(tx);
 
