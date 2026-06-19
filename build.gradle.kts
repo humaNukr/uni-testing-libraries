@@ -1,6 +1,6 @@
 plugins {
     java
-    id("info.solidsoft.pitest") version "1.15.0"
+    id("info.solidsoft.pitest") version "1.19.0"
 }
 
 group = "ua.edu.kma"
@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.25.3")
     testImplementation("org.mockito:mockito-core:5.11.0")
