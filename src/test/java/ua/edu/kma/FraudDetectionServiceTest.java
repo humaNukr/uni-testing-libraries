@@ -105,6 +105,18 @@ class FraudDetectionServiceTest {
 
             verify(alertNotifier, never()).sendAdminAlert(anyString());
         }
+
+        @Test
+        void verify_shouldSendAdminAlert_whenRiskIsCritical() {
+            Transaction tx = new Transaction("tx-alert", "user-alert", new BigDecimal("500.0"), "UA");
+            when(userRepository.findById("user-alert")).thenReturn(new User("user-alert", false));
+
+            when(riskEngine.calculateRisk(tx)).thenReturn(new BigDecimal("80.0"));
+
+            service.analyze(tx);
+
+            verify(alertNotifier).sendAdminAlert("tx-alert");
+        }
     }
 
     @Nested
@@ -188,6 +200,38 @@ class FraudDetectionServiceTest {
             AnalysisResult result = service.analyze(tx);
 
             assertThat(result.status()).isEqualTo(Status.MANUAL_REVIEW);
+        }
+
+        @Test
+        void shouldThrowException_whenAmountIsExactlyZero() {
+            Transaction tx = new Transaction("tx-zero", "user-3", BigDecimal.ZERO, "UA");
+
+            assertThatThrownBy(() -> service.analyze(tx))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Amount must be positive");
+        }
+
+        @Test
+        void shouldRejectTransaction_whenUserIsNull() {
+            Transaction tx = new Transaction("tx-null", "unknown-user", new BigDecimal("500.0"), "UA");
+            when(userRepository.findById("unknown-user")).thenReturn(null);
+
+            AnalysisResult result = service.analyze(tx);
+
+            assertThat(result.status()).isEqualTo(Status.REJECTED);
+
+            verify(auditLogger).logFraudAttempt("tx-null", "Account is suspended");
+        }
+
+        @Test
+        void shouldNotTriggerHighAmountRule_whenAmountIsExactly10000() {
+            Transaction tx = new Transaction("tx-10k", "user-10k", new BigDecimal("10000.0"), "UA");
+            when(userRepository.findById("user-10k")).thenReturn(new User("user-10k", false));
+            when(riskEngine.calculateRisk(tx)).thenReturn(new BigDecimal("10.0"));
+
+            AnalysisResult result = service.analyze(tx);
+
+            assertThat(result.triggeredRules()).doesNotContain("HIGH_AMOUNT");
         }
     }
 }

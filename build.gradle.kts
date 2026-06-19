@@ -24,6 +24,9 @@ tasks.test {
 
 pitest {
     junit5PluginVersion.set("1.2.1")
-    targetClasses.set(listOf("ua.edu.kma.*"))
-    mutators.set(listOf("DEFAULTS"))
+    targetClasses.set(setOf("ua.edu.kma.*"))
+    targetTests.set(setOf("ua.edu.kma.*"))
+    mutators.set(setOf("DEFAULTS"))
+    mutationThreshold.set(100)
+    outputFormats.set(setOf("HTML"))
 }
